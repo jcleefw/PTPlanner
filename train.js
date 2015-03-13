@@ -36,8 +36,6 @@ function getRichmondStationindex(lineName) {
 
 
 function noOfStops(startIndex, endIndex, toRichmond) {
-  
-
   var start = startIndex;
   var end = endIndex;
   var totalStop;
@@ -46,10 +44,12 @@ function noOfStops(startIndex, endIndex, toRichmond) {
   if(start > end ) {
     totalStop =  start - end ;
   } else {
-    totalStop = (end + start);
+    if(!toRichmond) {
+      totalStop =  end - start ;
+    } else {
+      totalStop = (end + start);
+    }
   }
-    
-  //console.log(totalStop);
   return totalStop;
 }
 
@@ -65,8 +65,6 @@ function lineDirection(startIndex, richmondIndex) {
   }
   return direction;
 }
-
-
 
 function findStopLine(stopName) {
   var objectSize = Object.keys(train).length;
@@ -88,12 +86,20 @@ function findStopLine(stopName) {
 }
 
 
-function lineStopsName (array, sliceBegin, sliceEnd) {
+function lineStopsName (toRichmond, array, sliceBegin, sliceEnd) {
   var stopsArray;
   console.log('sliceBegin = ' + sliceBegin + "; sliceEnd = "+sliceEnd);
+  console.log('toRichmond = ' + toRichmond);
 
   if(sliceEnd > sliceBegin) {
-    return array.slice(sliceBegin, sliceEnd);
+    console.log("bigger");
+    
+    if(!toRichmond) {
+      console.log('toRichmond = ' + toRichmond);
+      return array.slice(sliceBegin+1, sliceEnd+1);
+    } else {
+      return array.slice(sliceBegin, sliceEnd);
+    }
   } else {
     return array.slice(sliceEnd+1, sliceBegin+1);
   }
@@ -111,14 +117,12 @@ function joinStopsName (toRichmond, startArray, startDirection, endArray, endDir
     start = startArray.reverse();
   }
 
-  /*if(endDirection === "f") {
-    end = endArray;
-  }*/
   if(toRichmond) {
     start.push('Richmond');
+    return start.concat(end);
+  } else {
+    return start;
   }
-  
-  return start.concat(end);
 }
 
 
@@ -126,6 +130,8 @@ function joinStopsName (toRichmond, startArray, startDirection, endArray, endDir
 
 function planDestination(start, end){
   console.log("I start from " + start + "; end at " + end);
+
+  setStationProperties(start);
   // get which line does the stop belongs to
   var startLine = findStopLine(start);
   var endLine = findStopLine(end);
@@ -144,8 +150,13 @@ function planDestination(start, end){
   var stopFromStart; 
   var stopTilEnd;
 
-  var startStationArray;
+  
   var allStops;
+
+  var startDirection;
+  var endDirection;
+  var startStationArray;
+  var endStationArray
 
   // check whether the line is the same.
   if(startLine === endLine) {
@@ -154,19 +165,30 @@ function planDestination(start, end){
     console.log('startToRichmond =' + startToRichmond);
 
     // if start and end station is less than Richmond index on the same line
-    if (stationStartIndex < startToRichmond && stationEndIndex < endToRichmond) {
+    if (stationStartIndex < startToRichmond && stationEndIndex < endToRichmond || stationStartIndex > startToRichmond && stationEndIndex > endToRichmond) {
       console.log('I am not going through Richmond');
       goingToRichmond = false;
       totalStop = noOfStops(stationStartIndex, stationEndIndex, goingToRichmond);
 
-      startStationArray = lineStopsName(goingToRichmond, stationStartIndex, stationEndIndex );
+      startStationArray = lineStopsName(goingToRichmond, train[startLine],stationStartIndex, stationEndIndex);
+
+      allStops = joinStopsName(goingToRichmond, startStationArray, startDirection);
 
     // get the no of stop from the start and end index incomparison to start & end station
     } else {
+      goingToRichmond = true;
       stopFromStart = noOfStops(stationStartIndex, startToRichmond, goingToRichmond);
       stopTilEnd = noOfStops(stationEndIndex, endToRichmond);
 
       totalStop = stopFromStart + stopTilEnd;
+
+      // get train line direction whether forward or backwards
+      startDirection = lineDirection(stationStartIndex, startToRichmond);
+      endDirection = lineDirection(stationEndIndex, endToRichmond);
+
+      startStationArray = lineStopsName(goingToRichmond, train[startLine], stationStartIndex, startToRichmond);
+      endStationArray = lineStopsName(goingToRichmond, train[endLine], stationEndIndex, endToRichmond);
+      allStops = joinStopsName(goingToRichmond, startStationArray, startDirection, endStationArray, endDirection);
     }
   } else { // if line is different
       console.log('I am going through Richmond');
@@ -179,19 +201,22 @@ function planDestination(start, end){
       console.log("stopFromStart = " + stopFromStart + " ; stopTilEnd = " + stopTilEnd);
       // get total no of stops
       totalStop = stopFromStart + stopTilEnd;
+
+      // get train line direction whether forward or backwards
+      startDirection = lineDirection(stationStartIndex, startToRichmond);
+      endDirection = lineDirection(stationEndIndex, endToRichmond);
+      
+      // get each line stops from the departure & destination
+      startStationArray = lineStopsName(goingToRichmond, train[startLine], stationStartIndex, startToRichmond);
+      endStationArray = lineStopsName(goingToRichmond, train[endLine], stationEndIndex, endToRichmond);
+      allStops = joinStopsName(goingToRichmond, startStationArray, startDirection, endStationArray, endDirection);
     }
 
   
 
-  // get train line direction whether forward or backwards
-  var startDirection = lineDirection(stationStartIndex, startToRichmond);
-  var endDirection = lineDirection(stationEndIndex, endToRichmond);
   
-  // get each line stops from the departure & destination
-  startStationArray = lineStopsName(train[startLine], stationStartIndex, startToRichmond, startDirection);
-  var endStationArray = lineStopsName(train[endLine], stationEndIndex, endToRichmond, endDirection);
 
-  allStops = joinStopsName(goingToRichmond, startStationArray, startDirection, endStationArray, endDirection);
+  
   console.log(allStops);
   //console.log(startStationArray);
   //console.log(endStationArray);
@@ -223,14 +248,15 @@ function planDestination(start, end){
 //same line without before getting to richmond
 planDestination("Flagstaff", "Melbourne Central");
 
-/*//same line after richmond station
-planDestination("Hawthorn", "Glenferrie");
+//same line after richmond station
+// planDestination("Hawthorn", "Glenferrie");
 
 //same line passing by richmond
-planDestination("Flinder Street", "Glenferrie");
+// planDestination("Flinders Street", "Glenferrie");
 
 //different line passing richmond
-planDestination("Hawthorn", "Windsor");
+// planDestination("Hawthorn", "Windsor");
 
 //different line passing richmond
-planDestination("Windsor", "Flinder Street");*/
+// planDestination("Windsor", "Flinders Street");
+
