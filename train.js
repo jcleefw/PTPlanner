@@ -16,15 +16,7 @@ Add an additional lines
 Allow trains to have multiple intersection points*/
 
 
-var alameinLine = ["Flinders Street", "Richmond", "East Richmond", "Burnley", "Hawthorn", "Glenferrie"];
-var glenwaverlyLine = ["Flagstaff", "Melbourne Central", "Parliament", "Richmond", "Kooyong", "Tooronga"];
-var sandringhamLine = ["Southern Cross", "Richmond", "South Yarra", "Prahran", "Windsor"];
 
-var train = { 
-  alamein: alameinLine,
-  glenwaverly: glenwaverlyLine,
-  sandringham: sandringhamLine
-};
 
 function getTrainStationIndex(station, lineName) { 
   return train[lineName].indexOf(station);
@@ -125,13 +117,25 @@ function joinStopsName (toRichmond, startArray, startDirection, endArray, endDir
   }
 }
 
+function setStationProperties(station) {
+  var stationInfo = {};
 
+  // line it belong
+  var line = findStopLine(station);
+  // station index of the line it belong
+  var stationIndex = getTrainStationIndex(station, line);
+
+  stationInfo.line = line;
+  stationInfo.stationIndex = line;
+
+  return stationInfo;
+}
 
 
 function planDestination(start, end){
   console.log("I start from " + start + "; end at " + end);
 
-  setStationProperties(start);
+  console.log(setStationProperties(start));
   // get which line does the stop belongs to
   var startLine = findStopLine(start);
   var endLine = findStopLine(end);
@@ -237,26 +241,4 @@ function planDestination(start, end){
 
 }
 
-
-
-
-
-
-/**********************************************************************************/
-/* For the sake of debugging 
-/**********************************************************************************/
-//same line without before getting to richmond
-planDestination("Flagstaff", "Melbourne Central");
-
-//same line after richmond station
-// planDestination("Hawthorn", "Glenferrie");
-
-//same line passing by richmond
-// planDestination("Flinders Street", "Glenferrie");
-
-//different line passing richmond
-// planDestination("Hawthorn", "Windsor");
-
-//different line passing richmond
-// planDestination("Windsor", "Flinders Street");
 
