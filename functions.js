@@ -124,24 +124,6 @@ function lineStopsName (hasIntersection, lineArray, begin) {
 
 
 function joinStopsName (hasIntersection) {
-
-//   console.log(startArray);
-//   console.log(endArray);
-//   console.log("startDirection = " + startDirection + " ; endDirection = " + endDirection);
-
-//   var start = startArray;
-//   var end = endArray;
-//   if(startDirection === "back") {
-//     start = startArray.reverse();
-//   }
-
-//   if(toRichmond) {
-//     start.push('Richmond');
-//     return start.concat(end);
-//   } else {
-//     return start;
-//   }
-  
   var startArray = lineStopsName(hasIntersection, train[startStation.line], startStation.index);
   
   if(hasIntersection) {
