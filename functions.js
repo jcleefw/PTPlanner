@@ -47,14 +47,10 @@ var findLineIntersection = function(startLineArray, endLineArray) {
   for(var i in startLineArray) {
       if(endLineArray.indexOf( startLineArray[i] ) > -1){
           ret.push( startLineArray[i] );
-      }
+      } // else loop through other trainline array to find an intersection
   }
+  console.log(ret);
   return ret;
-}
-
-var sumTotalStops = function() {
-  console.log(startStation);
-  console.log(endStation);
 }
 
 function lineDirection(startIndex, intersectionIndex) {
@@ -109,7 +105,7 @@ function lineStopsName (hasIntersection, lineArray, begin) {
     sliceEnd = travelInfo.intersection[0].index.fromStart;
     console.log('sliceBegin = ' + sliceBegin + "; sliceEnd = "+sliceEnd);
     if(sliceEnd > sliceBegin) {
-      return array.slice(sliceEnd, sliceBegin);
+      return array.slice(sliceBegin, sliceEnd);
     } else {
       return array = array.slice(sliceEnd+1, sliceBegin+1);
     }
@@ -119,16 +115,15 @@ function lineStopsName (hasIntersection, lineArray, begin) {
     sliceEnd = endStation.index;
       return array.slice(sliceBegin+1, sliceEnd+1);
   }
-
 }
-
 
 function joinStopsName (hasIntersection) {
   var startArray = lineStopsName(hasIntersection, train[startStation.line], startStation.index);
   
   if(hasIntersection) {
+    console.log(endStation.line);
     var endArray = lineStopsName(hasIntersection, train[endStation.line], endStation.index);
-    
+    //console.log(endArray);
     (travelInfo.intersection[0].direction.fromStart === "back") ? startArray.reverse(): null; 
     startArray.shift(); startArray.push(travelInfo.intersection[0].name);
     //console.log(startArray);
